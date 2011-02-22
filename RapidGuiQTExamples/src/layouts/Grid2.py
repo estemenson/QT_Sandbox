@@ -13,6 +13,7 @@ class Example(QWidget):
     def __init__(self):
         super(Example, self).__init__()
         self.setAttribute(Qt.WA_AcceptTouchEvents)
+        self.grabGesture(Qt.PanGesture)
         self.initUI()
         self.my_touch_points = {} #keep track of each scribble
         self.current_touch_Id = None
