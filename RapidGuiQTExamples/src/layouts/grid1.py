@@ -13,22 +13,23 @@ class Example(QWidget):
     def __init__(self):
         super(Example, self).__init__()
         self.setAttribute(Qt.WA_AcceptTouchEvents)
-        self.grabGesture(Qt.SwipeGesture)
-        self.grabGesture(Qt.PanGesture)
-        self.grabGesture(Qt.PinchGesture)
+        #self.grabGesture(Qt.SwipeGesture)
+        #self.grabGesture(Qt.PanGesture)
+        #self.grabGesture(Qt.PinchGesture)
         self.initUI()
         self.my_touch_points = {} #keep track of each scribble
         self.current_touch_Id = None
         self.current_touch_index = 0
-        self._delta = None
-        self._matrix = QMatrix()
-        self._delta = QPointF()
-        self.rotationAngle = 0
-        self.scaleFactor = self.currentStepScaleFactor = 1
-        self._matrix.translate(self._delta.x(), self._delta.y())
-        self._matrix.rotate(self.rotationAngle)
-        self._matrix.scale(self.currentStepScaleFactor * self.scaleFactor,\
-                           self.currentStepScaleFactor * self.scaleFactor)
+#        self.resetMatrix()
+#    def resetMatrix(self):
+#        self._matrix = QMatrix()
+#        self._delta = QPointF()#self.width()/2,self.height()/2)
+#        self.rotationAngle = 0.0
+#        self.scaleFactor = self.currentStepScaleFactor = 1
+#        self._matrix.translate(self._delta.x(), self._delta.y())
+#        self._matrix.rotate(self.rotationAngle)
+#        self._matrix.scale(self.currentStepScaleFactor * self.scaleFactor,\
+#                           self.currentStepScaleFactor * self.scaleFactor)
         
     def initUI(self):
 
@@ -66,35 +67,41 @@ class Example(QWidget):
             return QWidget.event(self, event)
         finally:
             self.update()
-    def gestureEvent(self, e):
-        if e.gesture(Qt.PanGesture):
-            self.panTriggered(e.gesture(Qt.PanGesture))
-        elif e.gesture(Qt.SwipeGesture):
-            self.swipeTriggered(e.gesture(Qt.SwipeGesture))
-        elif e.gesture(Qt.PinchGesture):
-            self.pinchTriggered(e.gesture(Qt.PinchGesture))
-        return True
-    def panTriggered(self,gesture):
-        if (gesture.state() == Qt.GestureFinished):
-            print('Pan gestured finished!!')
-            self._delta = gesture.delta()
-#            for v in self.my_touch_points.values():
-#                for i in v:
-#                    i *= self._delta 
-            self.update()
-    def pinchTriggered(self,gesture):
-        changeFlags = gesture.changeFlags();
-        if changeFlags & QPinchGesture.RotationAngleChanged:
-            value = gesture.property("rotationAngle").toReal()
-            lastValue = gesture.property("lastRotationAngle").toReal()
-            self.rotationAngle += value - lastValue
-        if (changeFlags & QPinchGesture.ScaleFactorChanged):
-            value = gesture.property("scaleFactor").toReal()
-            self.currentStepScaleFactor = value
-        if (gesture.state() == Qt.GestureFinished):
-            self.scaleFactor *= self.currentStepScaleFactor;
-            self.currentStepScaleFactor = 1;
-        self.update()
+#    def gestureEvent(self, e):
+#        if e.gesture(Qt.PanGesture):
+#            self.panTriggered(e.gesture(Qt.PanGesture))
+#        elif e.gesture(Qt.SwipeGesture):
+#            self.swipeTriggered(e.gesture(Qt.SwipeGesture))
+#        elif e.gesture(Qt.PinchGesture):
+#            self.pinchTriggered(e.gesture(Qt.PinchGesture))
+#        return True
+#    def panTriggered(self,gesture):
+#        if (gesture.state() == Qt.GestureFinished):
+#            print('Pan gestured finished!!')
+#            self._delta = gesture.delta()
+##            for v in self.my_touch_points.values():
+##                for i in v:
+##                    i *= self._delta 
+#            self.update()
+#    def pinchTriggered(self,gesture):
+#        changeFlags = gesture.changeFlags();
+#        if changeFlags & QPinchGesture.RotationAngleChanged:
+#            value = gesture.property("rotationAngle").toReal()[0]
+#            lastValue = gesture.property("lastRotationAngle").toReal()[0]
+#            self.rotationAngle += value - lastValue
+#            print('Rotation: %f' % self.rotationAngle)
+##        if (changeFlags & QPinchGesture.ScaleFactorChanged):
+##            value = gesture.property("scaleFactor").toReal()[0]
+##            self.currentStepScaleFactor = value
+##            self.scaleFactor *= self.currentStepScaleFactor
+##            print('Scale: %f' % self.scaleFactor)
+#        if (gesture.state() == Qt.GestureFinished):
+#            print('Pinch gesture finished!!')
+#            self.resetMatrix()
+##            self._delta = QPointF()
+##            self.rotationAngle = 0.0
+##            self.scaleFactor = self.currentStepScaleFactor = 1
+#        self.update()
 #p.translate(ww/2, wh/2);
 #p.translate(horizontalOffset, verticalOffset);
 #p.rotate(rotationAngle);
@@ -102,17 +109,17 @@ class Example(QWidget):
 #p.translate(-iw/2, -ih/2);
 #p.drawImage(0, 0, currentImage)
 
-    def swipeTriggered(self, gesture):
-        if (gesture.state() == Qt.GestureFinished):
-            if gesture.horizontalDirection() == QSwipeGesture.Left\
-                    or gesture.verticalDirection() == QSwipeGesture.Up:
-                print('Swipe up or left')
-            else:
-                print('Swipe down or right')
-        self.update()
+#    def swipeTriggered(self, gesture):
+#        if (gesture.state() == Qt.GestureFinished):
+#            if gesture.horizontalDirection() == QSwipeGesture.Left\
+#                    or gesture.verticalDirection() == QSwipeGesture.Up:
+#                print('Swipe up or left')
+#            else:
+#                print('Swipe down or right')
+#        self.update()
 
-    def resizeEvent(self, e):
-        self.update()
+#    def resizeEvent(self, e):
+#        self.update()
  
     def paintEvent(self, e):
         qp = QPainter()
@@ -123,13 +130,13 @@ class Example(QWidget):
     def drawPoints(self, qp):
         qp.setPen(Qt.red)
         size = self.size()
-        self._matrix.translate(self._delta.x(), self._delta.y())
-        self._matrix.rotate(self.rotationAngle)
-        self._matrix.scale(self.currentStepScaleFactor * self.scaleFactor,\
-                           self.currentStepScaleFactor * self.scaleFactor)
+#        self._matrix.translate(self._delta.x(), self._delta.y())
+#        self._matrix.rotate(self.rotationAngle)
+#        self._matrix.scale(self.currentStepScaleFactor * self.scaleFactor,\
+#                           self.currentStepScaleFactor * self.scaleFactor)
 #            mat.rotate(45)
 #            mat.scale(self._delta.x(), self._delta.y())
-        qp.setMatrix(self._matrix)
+#        qp.setMatrix(self._matrix)
         
 #        for pos in self.my_touch_points:
 #            qp.drawPoint(pos)
