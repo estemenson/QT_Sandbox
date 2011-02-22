@@ -5,18 +5,22 @@ Created on 2011-02-18
 '''
 import sys
 #from PyQt4 import QtCore
-from PyQt4.QtCore import (QEvent, Qt, QPointF)
-from PyQt4.QtGui import (QWidget, QGridLayout, QApplication, QTouchEvent, QGestureEvent, QPainter, QSwipeGesture, QPanGesture, QMatrix, QPinchGesture)
+from PyQt4.QtCore import QEvent, QPointF
+from PyQt4.QtCore.Qt import WA_AcceptTouchEvents,PanGesture,red,\
+    GestureFinished,GestureStarted
+from PyQt4.QtGui import (QWidget, QGridLayout, QApplication, QTouchEvent,\
+    QGestureEvent, QPainter, QSwipeGesture, QPanGesture, QMatrix, QPinchGesture)
 import uuid
 class Example(QWidget):
   
     def __init__(self):
         super(Example, self).__init__()
-        self.setAttribute(Qt.WA_AcceptTouchEvents)
-        self.grabGesture(Qt.PanGesture)
+        self.setAttribute(WA_AcceptTouchEvents)
+        self.grabGesture(PanGesture)
         self.initUI()
         self.my_touch_points = {} #keep track of each scribble
         self.current_touch_Id = None
+        self.panningDirection = []
         
     def initUI(self):
 
@@ -49,6 +53,25 @@ class Example(QWidget):
             return QWidget.event(self, event)
         finally:
             self.update()
+    def gestureEvent(self, e):
+        if e.gesture(PanGesture):
+            self.panTriggered(e.gesture(PanGesture), e.)
+#        elif e.gesture(Qt.SwipeGesture):
+#            self.swipeTriggered(e.gesture(Qt.SwipeGesture))
+#        elif e.gesture(Qt.PinchGesture):
+#            self.pinchTriggered(e.gesture(Qt.PinchGesture))
+        return True
+    def panTriggered(self,gesture):
+        state = gesture.state()
+        if state == GestureStarted:
+            self.panningDirection.append(gesture.)
+        if ( state == GestureFinished):
+            print('Pan gestured finished!!')
+            self._delta = gesture.delta()
+#            for v in self.my_touch_points.values():
+#                for i in v:
+#                    i *= self._delta 
+            self.update()
     def paintEvent(self, e):
         qp = QPainter()
         qp.begin(self)
@@ -56,7 +79,7 @@ class Example(QWidget):
         qp.end()
         
     def drawPoints(self, qp):
-        qp.setPen(Qt.red)
+        qp.setPen(red)
 #        size = self.size()
         for k in self.my_touch_points.keys():
             for k1 in self.my_touch_points[k].keys():
