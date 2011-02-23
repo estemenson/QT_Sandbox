@@ -10,6 +10,10 @@ from PyQt4.QtGui import (QWidget, QGridLayout, QApplication, QTouchEvent,\
     QGestureEvent, QPainter, QSwipeGesture, QPanGesture, QMatrix,\
     QPinchGesture, QSpacerItem)
 import uuid
+TOUCH_ACCURACY = 50
+ROW_OR_COLUMN_RANGE = 20
+ROW = 'row'
+COLUMN = 'column'
 class Example(QWidget):
   
     def __init__(self):
@@ -53,13 +57,97 @@ class Example(QWidget):
         finally:
             self.update()
     def createNewRowOrColum(self,id):
-        return True
+        try:
+            for t in self.my_touch_points[id].keys():
+                k = self.my_touch_points[id][t]
+                #check the first and last points to see if is a column or a row
+                firstPoint = k[0]
+                lastPoint = k[len(k) -1]
+                width = lastPoint.x() - firstPoint.x()
+                height = firstPoint.y() - lastPoint.y()
+                w = self.width() - abs(width)
+                print('width diff = %f' % w)
+                h = self.height() - abs(height)
+                print('height diff = %f' % h)
+                avgY = (firstPoint.y() + lastPoint.y())/2.
+                avgX = (firstPoint.x() + lastPoint.x())/2.
+                if self.isRowOrColumn(w, avgY, width, k, ROW):
+                    pass
+                elif self.isRowOrColumn(h, avgX, height, k, COLUMN):
+                    pass
+#                if w <= TOUCH_ACCURACY:
+#                    #now check the y value of each point in this gesture is with is
+#                    #plus or minus 20 points
+#                    row = True
+#                    avgY = (firstPoint.y() + lastPoint.y())/2.
+#                    for p in k:
+#                        _h = avgY - p.y()
+#                        if abs(_h) > ROW_OR_COLUMN_RANGE:
+#                            print('Not a row, diff on y axis is too large: %f'\
+#                                  % _h)
+#                            row = False
+#                    if row and width < 0:
+#                        print('This is a row created from right to left')
+#                        self.newRow()
+#                    else:
+#                        print('This is a row created from left to right')
+#                elif h <= TOUCH_ACCURACY:
+#                    #now check the x value of each point in this gesture is 
+#                    #within plus or minus 20 points
+#                    avgX = (firstPoint.x() + lastPoint.x())/2.
+#                    col = True
+#                    for p in k:
+#                        _w = avgX - p.x()
+#                        if abs(_w) > ROW_OR_COLUMN_RANGE:
+#                            print(\
+#                                'Not a column, diff on x axis is too large: %f'\
+#                                % _w)
+#                            col = False
+#                    if col and height < 0:
+#                        print('This is a column created from top to bottom')
+#                    else:
+#                        print('This is a column created from Bottom to top')
+#                         
+#                    
+#                if firstPoint is not lastPoint:
+#                    if firstPoint.x() <= TOUCH_ACCURACY and\
+#                       lastPoint.x() >= self.width() - TOUCH_ACCURACY:
+#                        #this is a row
+#                        print('This is a row created from left to right')
+#                    if firstPoint.x() >= self.width() - TOUCH_ACCURACY and\
+#                       lastPoint.x() <= TOUCH_ACCURACY:
+#                        print('This is a row created from right to left')
+#                        
+#                self.my_touch_points[id][t.id()].append(t.pos())
+        finally:
+            return True
+    def isRowOrColumn(self, dif, avg, len, l_points, type):
+        ret = False
+        func = 'y' if type is ROW else 'x'
+        if dif <= TOUCH_ACCURACY:
+            #now check the dim value of each point in this gesture is 
+            #within plus or minus 20 points
+            ret = True
+            for p in l_points:
+                _h = avg - p.__getattribute__(func)()
+                if abs(_h) > ROW_OR_COLUMN_RANGE:
+                    print('Not a row or column diff on axis is too large: %f'\
+                          % _h)
+                    ret = False
+            if ret:
+                print('This is a %s' % type)
+                self.newRow()
+        return ret
+        
     def gestureEvent(self, e):
         l_gestures = e.activeGestures()
         print('Got a gesture!!')
-        for g in l_gestures:
-            if isinstance(g, Qt.PanGesture):
-                self.panTriggered(g)
+        if e.gesture(Qt.PanGesture):
+            self.panTriggered(e.gesture(Qt.PanGesture))
+#        for g in l_gestures:
+#            gg = e.gesture(Qt.PanGesture)
+#            if isinstance(g, gg):
+#                self.panTriggered(g)
 #        elif e.gesture(Qt.SwipeGesture):
 #            self.swipeTriggered(e.gesture(Qt.SwipeGesture))
 #        elif e.gesture(Qt.PinchGesture):
