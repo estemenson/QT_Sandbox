@@ -5,18 +5,17 @@ Created on 2011-02-18
 '''
 import sys
 #from PyQt4 import QtCore
-from PyQt4.QtCore import QEvent, QPointF
-from PyQt4.QtCore.Qt import WA_AcceptTouchEvents,PanGesture,red,\
-    GestureFinished,GestureStarted
+from PyQt4.QtCore import QEvent, QPointF, Qt
 from PyQt4.QtGui import (QWidget, QGridLayout, QApplication, QTouchEvent,\
-    QGestureEvent, QPainter, QSwipeGesture, QPanGesture, QMatrix, QPinchGesture)
+    QGestureEvent, QPainter, QSwipeGesture, QPanGesture, QMatrix,\
+    QPinchGesture, QSpacerItem)
 import uuid
 class Example(QWidget):
   
     def __init__(self):
         super(Example, self).__init__()
-        self.setAttribute(WA_AcceptTouchEvents)
-        self.grabGesture(PanGesture)
+        self.setAttribute(Qt.WA_AcceptTouchEvents)
+        self.grabGesture(Qt.PanGesture)
         self.initUI()
         self.my_touch_points = {} #keep track of each scribble
         self.current_touch_Id = None
@@ -25,8 +24,8 @@ class Example(QWidget):
     def initUI(self):
 
         self.setWindowTitle('grid layout')
-        grid = QGridLayout()
-        self.setLayout(grid)
+        self.grid = QGridLayout()
+        self.setLayout(self.grid)
 
     def event(self,event):
         try:
@@ -49,13 +48,18 @@ class Example(QWidget):
                 id = self.current_touch_Id
                 for t in event.touchPoints():
                     self.my_touch_points[id][t.id()].append(t.pos())
-                return True
+                return self.createNewRowOrColum(id)
             return QWidget.event(self, event)
         finally:
             self.update()
+    def createNewRowOrColum(self,id):
+        return True
     def gestureEvent(self, e):
-        if e.gesture(PanGesture):
-            self.panTriggered(e.gesture(PanGesture), e.)
+        l_gestures = e.activeGestures()
+        print('Got a gesture!!')
+        for g in l_gestures:
+            if isinstance(g, Qt.PanGesture):
+                self.panTriggered(g)
 #        elif e.gesture(Qt.SwipeGesture):
 #            self.swipeTriggered(e.gesture(Qt.SwipeGesture))
 #        elif e.gesture(Qt.PinchGesture):
@@ -63,11 +67,14 @@ class Example(QWidget):
         return True
     def panTriggered(self,gesture):
         state = gesture.state()
-        if state == GestureStarted:
-            self.panningDirection.append(gesture.)
-        if ( state == GestureFinished):
+        if state == Qt.GestureStarted:
+            pass#self.panningDirection.append(gesture.)
+        if ( state == Qt.GestureFinished):
             print('Pan gestured finished!!')
-            self._delta = gesture.delta()
+#            spacer = QSpacerItem()
+#            self.grid.addItem(QLayoutItem, int, int, rowSpan=1, columnSpan=1, alignment=0)
+            #self._delta = gesture.delta()
+            
 #            for v in self.my_touch_points.values():
 #                for i in v:
 #                    i *= self._delta 
@@ -79,7 +86,7 @@ class Example(QWidget):
         qp.end()
         
     def drawPoints(self, qp):
-        qp.setPen(red)
+        qp.setPen(Qt.red)
 #        size = self.size()
         for k in self.my_touch_points.keys():
             for k1 in self.my_touch_points[k].keys():
