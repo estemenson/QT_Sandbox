@@ -19,7 +19,7 @@ class Example(QWidget):
         
     def initUI(self):
 
-        self.setWindowTitle('grid layout')
+        self.setWindowTitle('scrible grid layout')
         grid = QGridLayout()
         self.setLayout(grid)
 
