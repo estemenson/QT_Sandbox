@@ -5,11 +5,11 @@ Created on 2011-02-18
 '''
 import sys
 #from PyQt4 import QtCore
-from PyQt4.QtCore import QEvent, QPointF, Qt, QLineF,QRect
+from PyQt4.QtCore import QEvent, QPointF, Qt, QLineF
 from PyQt4.QtGui import (QWidget, QGridLayout, QApplication, QTouchEvent,\
     QGestureEvent, QPainter, QSwipeGesture, QPanGesture, QMatrix,\
     QPinchGesture, QSpacerItem, QTableWidget, QTableWidgetItem, QBoxLayout, 
-    QLabel,QFrame,QGroupBox, QVBoxLayout)
+    QLabel,QFrame)
 import uuid
 from layouts.borderlayout import BorderLayout
 TOUCH_ACCURACY = 50
@@ -272,39 +272,20 @@ class Grid2(QWidget):
     def __init__(self):
         super(Grid2, self).__init__()
         self.setAttribute(Qt.WA_AcceptTouchEvents)
-        #self.grabGesture(Qt.PanGesture)
+        self.grabGesture(Qt.PanGesture)
         self.initUI()
         self.my_touch_points = {} #keep track of each scribble
         self.current_touch_Id = None
+        self.panningDirection = []
         self.rows = []
         self.columns = []
-        self.oldSize = self.size()
         
     def initUI(self):
 
         self.setWindowTitle('Grid2 layout')
-        self.createMainFrame()
         self.grid = QGridLayout()
-        self.mainFrame.setLayout(self.grid)
-        self.mainLayout = QVBoxLayout()
-        self.mainLayout.addWidget(self.mainFrame)
-        self.setLayout(self.mainLayout)
+        self.setLayout(self.grid)
 
-    def createMainFrame(self):
-        self.mainFrame = QFrame()
-        self.mainFrame.setFrameStyle(QFrame.Box | QFrame.Panel)
-        self.mainFrame.setFrameRect(QRect(self.x() +40,self.y() + 40, 
-                                        self.width() - 80, self.height() -80))
-    def createGridGroupBox(self):
-        self.gridGroupBox = QGroupBox("Grid layout")
-        layout = QGridLayout()
-        self.gridGroupBox.setLayout(layout)
-    def resizeEvent(self, event):
-        for row in self.rows:
-            row.setLine(row.x1(), row.y1(),self.width(),row.y2())
-        for col in self.columns:
-            col.setLine(col.x1(), col.y1(),col.x2(),self.height())
-        
     def event(self,event):
         try:
             type = event.type()
@@ -313,7 +294,7 @@ class Grid2(QWidget):
             if type == QEvent.TouchBegin:
                 id = self.current_touch_Id = uuid.uuid1()
                 t = event.touchPoints()[0]
-                self.my_touch_points[id]={}#t.id():[t.pos()]}
+                self.my_touch_points[id]={t.id():[t.pos()]}
                 return True
             if type == QEvent.TouchUpdate:
                 id = self.current_touch_Id
@@ -372,36 +353,34 @@ class Grid2(QWidget):
                     break
         return ret
         
-#===============================================================================
-#    def gestureEvent(self, e):
-#        #l_gestures = e.activeGestures()
-#        print('Got a gesture!!')
-#        if e.gesture(Qt.PanGesture):
-#            self.panTriggered(e.gesture(Qt.PanGesture))
-# #        for g in l_gestures:
-# #            gg = e.gesture(Qt.PanGesture)
-# #            if isinstance(g, gg):
-# #                self.panTriggered(g)
-# #        elif e.gesture(Qt.SwipeGesture):
-# #            self.swipeTriggered(e.gesture(Qt.SwipeGesture))
-# #        elif e.gesture(Qt.PinchGesture):
-# #            self.pinchTriggered(e.gesture(Qt.PinchGesture))
-#        return True
-#    def panTriggered(self,gesture):
-#        state = gesture.state()
-#        if state == Qt.GestureStarted:
-#            pass#self.panningDirection.append(gesture.)
-#        if ( state == Qt.GestureFinished):
-#            print('Pan gestured finished!!')
-# #            spacer = QSpacerItem()
-# #            self.grid.addItem(QLayoutItem, int, int, rowSpan=1, columnSpan=1, alignment=0)
-#            #self._delta = gesture.delta()
-#            
-# #            for v in self.my_touch_points.values():
-# #                for i in v:
-# #                    i *= self._delta 
-#            self.update()
-#===============================================================================
+    def gestureEvent(self, e):
+        #l_gestures = e.activeGestures()
+        print('Got a gesture!!')
+        if e.gesture(Qt.PanGesture):
+            self.panTriggered(e.gesture(Qt.PanGesture))
+#        for g in l_gestures:
+#            gg = e.gesture(Qt.PanGesture)
+#            if isinstance(g, gg):
+#                self.panTriggered(g)
+#        elif e.gesture(Qt.SwipeGesture):
+#            self.swipeTriggered(e.gesture(Qt.SwipeGesture))
+#        elif e.gesture(Qt.PinchGesture):
+#            self.pinchTriggered(e.gesture(Qt.PinchGesture))
+        return True
+    def panTriggered(self,gesture):
+        state = gesture.state()
+        if state == Qt.GestureStarted:
+            pass#self.panningDirection.append(gesture.)
+        if ( state == Qt.GestureFinished):
+            print('Pan gestured finished!!')
+#            spacer = QSpacerItem()
+#            self.grid.addItem(QLayoutItem, int, int, rowSpan=1, columnSpan=1, alignment=0)
+            #self._delta = gesture.delta()
+            
+#            for v in self.my_touch_points.values():
+#                for i in v:
+#                    i *= self._delta 
+            self.update()
     def paintEvent(self, e):
         qp = QPainter()
         qp.begin(self)
